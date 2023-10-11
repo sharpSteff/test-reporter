@@ -284,6 +284,7 @@ function main() {
 }
 class TestReporter {
     constructor() {
+        this.serverUrl = core.getInput('github-server-url');
         this.artifact = core.getInput('artifact', { required: false });
         this.name = core.getInput('name', { required: true });
         this.path = core.getInput('path', { required: true });
@@ -389,11 +390,12 @@ class TestReporter {
                     throw error;
                 }
             }
-            core.info(`Creating check run ${name}`);
+            const baseURL = this.getBaseUrl(this.getServerUrl(this.serverUrl).href);
+            core.info(`Creating check run ${name} on ${baseURL}`);
             const createResp = yield this.octokit.rest.checks.create(Object.assign({ head_sha: this.context.sha, name, status: 'in_progress', output: {
                     title: name,
                     summary: ''
-                } }, github.context.repo));
+                }, baseUrl: baseURL }, github.context.repo));
             core.info('Creating report summary');
             const { listSuites, listTests, onlySummary } = this;
             const baseUrl = createResp.data.html_url;
@@ -434,6 +436,14 @@ class TestReporter {
             default:
                 throw new Error(`Input variable 'reporter' is set to invalid value '${reporter}'`);
         }
+    }
+    getServerUrl(url) {
+        const urlValue = url && url.trim().length > 0 ? url : process.env['GITHUB_SERVER_URL'] || 'https://github.com';
+        return new URL(urlValue);
+    }
+    getBaseUrl(url) {
+        const matcher = url.match(/^[^?]+/);
+        return (matcher && matcher[0].replace(/\/+$/g, '')) || '';
     }
 }
 main();
