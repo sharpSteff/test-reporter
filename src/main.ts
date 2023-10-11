@@ -162,7 +162,7 @@ class TestReporter {
     }
 
     const baseURL = this.getBaseUrl(this.getServerUrl(this.serverUrl).href)
-    core.info(`Creating check run ${name} for repo ${github.context.repo.repo}} on ${baseURL}`)
+    core.info(`Creating check run ${name} on ${baseURL}`)
     const createResp = await this.octokit.rest.checks.create({
       head_sha: this.context.sha,
       name,
