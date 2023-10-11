@@ -31,6 +31,7 @@ async function main(): Promise<void> {
 }
 
 class TestReporter {
+  readonly serverUrl = core.getInput('github-server-url')
   readonly artifact = core.getInput('artifact', {required: false})
   readonly name = core.getInput('name', {required: true})
   readonly path = core.getInput('path', {required: true})
@@ -160,7 +161,8 @@ class TestReporter {
       }
     }
 
-    core.info(`Creating check run ${name}`)
+    const baseURL = this.getBaseUrl(this.getServerUrl(this.serverUrl).href)
+    core.info(`Creating check run ${name} for repo ${github.context.repo.repo}} on ${baseURL}`)
     const createResp = await this.octokit.rest.checks.create({
       head_sha: this.context.sha,
       name,
@@ -169,6 +171,7 @@ class TestReporter {
         title: name,
         summary: ''
       },
+      baseUrl: baseURL,
       ...github.context.repo
     })
 
@@ -222,6 +225,16 @@ class TestReporter {
       default:
         throw new Error(`Input variable 'reporter' is set to invalid value '${reporter}'`)
     }
+  }
+
+  getServerUrl(url?: string): URL {
+    const urlValue = url && url.trim().length > 0 ? url : process.env['GITHUB_SERVER_URL'] || 'https://github.com'
+    return new URL(urlValue)
+  }
+
+  getBaseUrl(url: string): string {
+    const matcher = url.match(/^[^?]+/)
+    return (matcher && matcher[0].replace(/\/+$/g, '')) || ''
   }
 }
 
