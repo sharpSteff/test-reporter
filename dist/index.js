@@ -390,7 +390,7 @@ class TestReporter {
                     throw error;
                 }
             }
-            const baseURL = this.getBaseUrl(this.getServerUrl(this.serverUrl).href);
+            const baseURL = this.getBaseUrl(this.getServerUrl(this.serverUrl).href) + '/api/v1';
             core.info(`Creating check run ${name} on ${baseURL}`);
             const createResp = yield this.octokit.rest.checks.create(Object.assign({ head_sha: this.context.sha, name, status: 'in_progress', output: {
                     title: name,
@@ -410,7 +410,7 @@ class TestReporter {
                     title: `${name} ${icon}`,
                     summary,
                     annotations
-                } }, github.context.repo));
+                }, baseUrl: baseURL }, github.context.repo));
             core.info(`Check run create response: ${resp.status}`);
             core.info(`Check run URL: ${resp.data.url}`);
             core.info(`Check run HTML: ${resp.data.html_url}`);

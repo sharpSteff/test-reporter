@@ -161,7 +161,7 @@ class TestReporter {
       }
     }
 
-    const baseURL = this.getBaseUrl(this.getServerUrl(this.serverUrl).href)
+    const baseURL = this.getBaseUrl(this.getServerUrl(this.serverUrl).href) + '/api/v1'
     core.info(`Creating check run ${name} on ${baseURL}`)
     const createResp = await this.octokit.rest.checks.create({
       head_sha: this.context.sha,
@@ -197,6 +197,7 @@ class TestReporter {
         summary,
         annotations
       },
+      baseUrl: baseURL,
       ...github.context.repo
     })
     core.info(`Check run create response: ${resp.status}`)
